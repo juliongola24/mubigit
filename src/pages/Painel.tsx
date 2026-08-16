@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { ghAction, type RepoCommit, type RepoItem } from "@/lib/github";
+import {
+  ghAction,
+  getCred,
+  setCred,
+  clearCred,
+  type RepoCommit,
+  type RepoItem,
+} from "@/lib/github";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,14 +27,12 @@ import {
 
 const parentOf = (path: string) => path.split("/").slice(0, -1).join("/");
 
-const SESSION_KEY = "mubissule_debug_user";
-
 export default function Painel() {
   const [user, setUser] = useState<string | null>(null);
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    setUser(localStorage.getItem(SESSION_KEY));
+    setUser(getCred()?.username ?? null);
     setChecking(false);
   }, []);
 
@@ -42,7 +46,7 @@ export default function Painel() {
   }, []);
 
   const signOut = () => {
-    localStorage.removeItem(SESSION_KEY);
+    clearCred();
     setUser(null);
   };
 
@@ -65,25 +69,18 @@ function Login({ onLogin }: { onLogin: (u: string) => void }) {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { data, error } = await (supabase as any)
-      .from("debug")
-      .select("usuario")
-      .eq("usuario", usuario.trim())
-      .eq("senha", senha)
-      .maybeSingle();
-    setLoading(false);
-
-    if (error) {
-      toast.error(error.message);
-      return;
+    const cred = { username: usuario.trim(), password: senha };
+    try {
+      await ghAction("login", {}, cred);
+      setCred(cred);
+      onLogin(cred.username);
+    } catch (err) {
+      toast.error((err as Error).message || "Utilizador ou palavra-passe incorrectos.");
+    } finally {
+      setLoading(false);
     }
-    if (!data) {
-      toast.error("Utilizador ou palavra-passe incorrectos.");
-      return;
-    }
-    localStorage.setItem(SESSION_KEY, data.usuario);
-    onLogin(data.usuario);
   };
+
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
