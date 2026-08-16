@@ -1,0 +1,333 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    /* Mubissule — Natural Medicine palette */
+    --background: 60 20% 98%;
+    --foreground: 150 50% 8%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 150 50% 8%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 150 50% 8%;
+
+    /* Primary: Deep forest green */
+    --primary: 150 65% 18%;
+    --primary-foreground: 45 80% 92%;
+    --primary-light: 150 30% 92%;
+    --primary-dark: 150 75% 10%;
+
+    /* Secondary: Cream / parchment */
+    --secondary: 45 40% 94%;
+    --secondary-foreground: 150 50% 12%;
+
+    --muted: 60 15% 95%;
+    --muted-foreground: 150 15% 35%;
+
+    /* Accent: Warm gold */
+    --accent: 42 70% 52%;
+    --accent-foreground: 150 65% 12%;
+    --accent-light: 42 80% 88%;
+
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 150 20% 88%;
+    --input: 150 20% 88%;
+    --ring: 150 65% 18%;
+
+    --radius: 0.5rem;
+
+    /* Brand naturals */
+    --forest-deep: 150 75% 10%;
+    --forest-mid: 150 65% 18%;
+    --forest-light: 150 40% 32%;
+    --gold: 42 70% 52%;
+    --gold-soft: 42 60% 70%;
+    --cream: 45 40% 94%;
+
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(150 75% 10%) 0%, hsl(150 65% 18%) 60%, hsl(150 55% 25%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(42 75% 55%) 0%, hsl(38 65% 45%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(60 20% 98%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(60 20% 98%) 0%, hsl(45 30% 95%) 100%);
+    --gradient-dark: linear-gradient(180deg, hsl(150 75% 8%) 0%, hsl(150 65% 14%) 100%);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(150 50% 8% / 0.06);
+    --shadow-md: 0 4px 6px -1px hsl(150 50% 8% / 0.08), 0 2px 4px -2px hsl(150 50% 8% / 0.05);
+    --shadow-lg: 0 10px 25px -5px hsl(150 50% 8% / 0.12), 0 8px 10px -6px hsl(150 50% 8% / 0.08);
+    --shadow-card: 0 4px 20px -4px hsl(150 65% 18% / 0.15);
+    --shadow-hover: 0 12px 40px -8px hsl(150 65% 18% / 0.28);
+    --shadow-gold: 0 8px 24px -6px hsl(42 70% 52% / 0.4);
+
+    /* Typography */
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-serif: 'Playfair Display', Georgia, serif;
+
+    /* Sidebar */
+    --sidebar-background: 60 20% 98%;
+    --sidebar-foreground: 150 50% 15%;
+    --sidebar-primary: 150 65% 18%;
+    --sidebar-primary-foreground: 45 80% 92%;
+    --sidebar-accent: 45 40% 94%;
+    --sidebar-accent-foreground: 150 50% 15%;
+    --sidebar-border: 150 20% 88%;
+    --sidebar-ring: 150 65% 18%;
+  }
+
+  .dark {
+    --background: 150 50% 6%;
+    --foreground: 45 30% 92%;
+    --card: 150 45% 10%;
+    --card-foreground: 45 30% 92%;
+    --popover: 150 45% 10%;
+    --popover-foreground: 45 30% 92%;
+    --primary: 42 70% 55%;
+    --primary-foreground: 150 65% 10%;
+    --primary-light: 150 40% 18%;
+    --primary-dark: 42 80% 65%;
+    --secondary: 150 40% 14%;
+    --secondary-foreground: 45 30% 92%;
+    --muted: 150 30% 14%;
+    --muted-foreground: 45 15% 65%;
+    --accent: 42 70% 55%;
+    --accent-foreground: 150 65% 10%;
+    --border: 150 30% 18%;
+    --input: 150 30% 18%;
+    --ring: 42 70% 55%;
+    --gradient-hero: linear-gradient(135deg, hsl(150 75% 6%) 0%, hsl(150 65% 12%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(150 45% 10%) 0%, hsl(150 50% 8%) 100%);
+    --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.4);
+    --shadow-hover: 0 12px 40px -8px hsl(42 70% 55% / 0.25);
+    --sidebar-background: 150 50% 8%;
+    --sidebar-foreground: 45 30% 90%;
+    --sidebar-primary: 42 70% 55%;
+    --sidebar-primary-foreground: 150 65% 10%;
+    --sidebar-accent: 150 40% 14%;
+    --sidebar-accent-foreground: 45 30% 92%;
+    --sidebar-border: 150 30% 18%;
+    --sidebar-ring: 42 70% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    @apply font-bold tracking-tight;
+  }
+
+  .font-serif {
+    font-family: var(--font-serif);
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+  }
+}
+
+@layer components {
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .gradient-gold {
+    background: var(--gradient-gold);
+  }
+
+  .gradient-dark {
+    background: var(--gradient-dark);
+  }
+
+  .gradient-card {
+    background: var(--gradient-card);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .shadow-card-hover {
+    box-shadow: var(--shadow-hover);
+  }
+
+  .shadow-gold {
+    box-shadow: var(--shadow-gold);
+  }
+
+  .text-gradient {
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gold {
+    color: hsl(var(--accent));
+  }
+
+  .gold-divider {
+    height: 2px;
+    width: 60px;
+    background: var(--gradient-gold);
+    border-radius: 2px;
+  }
+
+  /* Article content styling for static HTML */
+  .article-content {
+    @apply text-lg leading-relaxed max-w-none;
+  }
+
+  .article-content h2 {
+    @apply text-2xl font-bold text-foreground mt-10 mb-4 pb-2 border-b border-border;
+  }
+
+  .article-content h3 {
+    @apply text-xl font-semibold text-foreground mt-8 mb-3;
+  }
+
+  .article-content p {
+    @apply text-muted-foreground leading-relaxed mb-4;
+  }
+
+  .article-content ul, .article-content ol {
+    @apply my-4 pl-6 text-muted-foreground;
+  }
+
+  .article-content li {
+    @apply mb-2;
+  }
+
+  .article-content blockquote {
+    @apply border-l-4 border-primary pl-4 italic my-6 text-muted-foreground bg-primary-light/30 py-3 pr-4 rounded-r-lg;
+  }
+
+  .article-content table {
+    @apply w-full my-6 border-collapse;
+  }
+
+  .article-content th {
+    @apply bg-primary text-primary-foreground px-4 py-3 text-left font-semibold;
+  }
+
+  .article-content td {
+    @apply border border-border px-4 py-3;
+  }
+
+  .article-content img {
+    @apply rounded-xl shadow-lg my-6;
+  }
+
+  .article-content a {
+    @apply text-primary hover:text-primary-dark underline underline-offset-2 transition-colors;
+  }
+
+  /* Card animations */
+  .card-hover {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .card-hover:hover {
+    @apply -translate-y-1;
+    box-shadow: var(--shadow-hover);
+  }
+
+  /* Badge styles */
+  .badge-category {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide;
+  }
+
+  .badge-doencas {
+    @apply bg-red-100 text-red-700;
+  }
+
+  .badge-prevencao {
+    @apply bg-green-100 text-green-700;
+  }
+
+  .badge-bem-estar {
+    @apply bg-blue-100 text-blue-700;
+  }
+
+  .badge-estetica {
+    @apply bg-purple-100 text-purple-700;
+  }
+
+  .badge-nutricao {
+    @apply bg-orange-100 text-orange-700;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out forwards;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.5s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { 
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}

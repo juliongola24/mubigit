@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor de Artigos · Mubissule</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/mubissule-static.css">
+<link rel="icon" href="/favicon.ico">
+<style>
+  body { background: #0F3D2E; }
+  .editor-wrap { max-width: 1280px; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
+  .editor-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .85rem 1rem; background: #0A2A20; color: #fff; border-radius: 12px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .editor-header .title { display: flex; align-items: center; gap: .75rem; font-family: 'Playfair Display', serif; font-size: 1.15rem; }
+  .editor-header .title img { height: 32px; }
+  .editor-header .title .sep { opacity: .5; }
+  .editor-header .title .gold { color: #C9A24A; }
+  .toolbar { display: flex; gap: .5rem; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: .4rem; padding: .55rem .9rem; border-radius: 8px; font-size: .85rem; font-weight: 600; border: none; cursor: pointer; transition: transform .15s, box-shadow .15s; }
+  .btn-primary { background: #2563EB; color: #fff; }
+  .btn-secondary { background: #374151; color: #fff; }
+  .btn-success { background: #16A34A; color: #fff; }
+  .btn-danger  { background: #4B5563; color: #fff; }
+  .btn-gold-sm { background: linear-gradient(135deg,#C9A24A,#A8842F); color:#fff; }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,.25); }
+  .btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+  .tabs { display: flex; background: #fff; border-radius: 12px 12px 0 0; overflow: hidden; }
+  .tab { flex: 1; padding: 1rem; font-weight: 700; font-size: .95rem; text-align: center; cursor: pointer; color: #6B7280; background: #F3F4F6; border: none; display: inline-flex; gap: .5rem; align-items: center; justify-content: center; }
+  .tab.active { background: #DC2626; color: #fff; }
+
+  .subtabs { display: flex; background: #fff; border-bottom: 1px solid #E5E7EB; }
+  .subtab { flex: 1; padding: .85rem; font-weight: 600; font-size: .85rem; color: #6B7280; cursor: pointer; background: none; border: none; display: inline-flex; gap: .4rem; align-items: center; justify-content: center; border-bottom: 3px solid transparent; }
+  .subtab.active { color: #0F3D2E; border-bottom-color: #C9A24A; }
+
+  .pane { background: #fff; border-radius: 0 0 12px 12px; padding: 1.25rem; min-height: 60vh; }
+  .accordion { border: 1px solid #E5E7EB; border-radius: 10px; margin-bottom: .85rem; overflow: hidden; }
+  .accordion summary { list-style: none; cursor: pointer; padding: 1rem 1.15rem; font-weight: 700; color: #1F2937; display: flex; align-items: center; justify-content: space-between; gap: .5rem; background: #FAFAFA; }
+  .accordion summary::-webkit-details-marker { display: none; }
+  .accordion summary::after { content: '⌄'; font-size: 1.2rem; transition: transform .2s; color: #6B7280; }
+  .accordion[open] summary::after { transform: rotate(180deg); }
+  .accordion-body { padding: 1.15rem; display: grid; gap: .9rem; }
+
+  .field { display: flex; flex-direction: column; gap: .35rem; }
+  .field label { font-size: .8rem; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: .04em; }
+  .field input, .field textarea, .field select {
+    width: 100%; padding: .65rem .8rem; border: 1px solid #D1D5DB; border-radius: 8px;
+    font-family: inherit; font-size: .95rem; background: #fff; color: #111827;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    outline: none; border-color: #0F3D2E; box-shadow: 0 0 0 3px rgba(15,61,46,.15);
+  }
+  .field textarea { min-height: 90px; resize: vertical; }
+  .field .hint { font-size: .75rem; color: #6B7280; }
+  .field .counter { font-size: .72rem; color: #9CA3AF; align-self: flex-end; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+  @media (max-width: 640px) { .row2 { grid-template-columns: 1fr; } }
+
+  .block { border: 1px solid #E5E7EB; border-radius: 10px; padding: .9rem; margin-bottom: .85rem; background: #FAFAFA; }
+  .block-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .55rem; }
+  .block-type { font-size: .72rem; font-weight: 800; letter-spacing: .12em; color: #374151; text-transform: uppercase; }
+  .block-actions { display: flex; gap: .25rem; }
+  .icon-btn { width: 30px; height: 30px; border-radius: 6px; border: 1px solid #D1D5DB; background: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; color: #6B7280; }
+  .icon-btn:hover { background: #F3F4F6; color: #111827; }
+  .icon-btn.danger:hover { color: #DC2626; border-color: #DC2626; }
+
+  .add-blocks { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; margin-top: .35rem; }
+  @media (max-width: 540px) { .add-blocks { grid-template-columns: repeat(2, 1fr); } }
+  .add-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+    padding: .7rem; border: 1px solid #D1D5DB; border-radius: 8px; background: #fff;
+    font-size: .85rem; font-weight: 500; color: #374151; cursor: pointer;
+  }
+  .add-btn:hover { border-color: #0F3D2E; color: #0F3D2E; background: #F0FDF4; }
+
+  /* preview & code panes */
+  .preview-frame { width: 100%; height: 75vh; border: 1px solid #E5E7EB; border-radius: 10px; background: #fff; }
+  .code-toolbar { display: flex; gap: .5rem; margin-bottom: .75rem; flex-wrap: wrap; align-items: center; }
+  .code-toolbar .switch { display: inline-flex; background: #F3F4F6; border-radius: 8px; padding: 4px; }
+  .code-toolbar .switch button { padding: .45rem .9rem; border: none; background: none; border-radius: 6px; font-weight: 600; font-size: .85rem; cursor: pointer; color: #6B7280; }
+  .code-toolbar .switch button.active { background: #2563EB; color: #fff; }
+  .code-out { width: 100%; min-height: 60vh; padding: 1rem; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: .8rem; line-height: 1.5; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; white-space: pre; overflow: auto; color: #111827; }
+
+  .toast {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(120%);
+    background: #0F3D2E; color: #fff; padding: .8rem 1.4rem; border-radius: 999px; font-weight: 600;
+    box-shadow: 0 12px 32px rgba(0,0,0,.3); z-index: 100; transition: transform .3s ease;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="editor-wrap">
+
+  <div class="editor-header">
+    <div class="title">
+      <img src="/mubissule-logo.png" alt="Mubissule">
+      <span><span class="gold">Mubissule</span> <span class="sep">/</span> Editor de Artigos</span>
+    </div>
+    <div class="toolbar">
+      <button class="btn btn-danger" id="btn-clear"> Limpar</button>
+      <button class="btn btn-primary" id="btn-show-array"> Array</button>
+      <button class="btn btn-primary" id="btn-show-html">&lt;/&gt; HTML</button>
+      <button class="btn btn-success" id="btn-download">⬇ Descarregar</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="post">📰 POST</button>
+  </div>
+
+  <div class="subtabs">
+    <button class="subtab active" data-sub="form">📝 Formulário</button>
+    <button class="subtab" data-sub="preview">👁 Preview</button>
+    <button class="subtab" data-sub="code">&lt;/&gt; Código</button>
+  </div>
+
+  <div class="pane">
+
+    <!-- FORM PANE -->
+    <div id="pane-form">
+
+      <details class="accordion" open>
+        <summary> Dados do Post</summary>
+        <div class="accordion-body">
+          <div class="field">
+            <label>Título do artigo *</label>
+            <input type="text" id="f-titulo" placeholder="Ex: Diabetes Tipo 2: Abordagem Natural no Mubissule" maxlength="120">
+            <div class="counter"><span id="c-titulo">0</span>/120</div>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label>Slug (auto)</label>
+              <input type="text" id="f-slug" placeholder="diabetes-tipo-2-abordagem-natural">
+              <div class="hint">Gerado a partir do título. Editável.</div>
+            </div>
+            <div class="field">
+              <label>Categoria</label>
+              <select id="f-categoria">
+                <option value="doencas">Condições Tratadas</option>
+                <option value="prevencao">Prevenção Natural</option>
+                <option value="bem-estar">Bem-estar</option>
+                <option value="estetica">Cuidados da Pele</option>
+                <option value="nutricao">Nutrição</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Resumo / Lead *</label>
+            <textarea id="f-resumo" placeholder="Frase de abertura do artigo (também usada na meta description)" maxlength="220"></textarea>
+            <div class="counter"><span id="c-resumo">0</span>/220</div>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label>Autor</label>
+              <input type="text" id="f-autor" value="Mubissule">
+            </div>
+            <div class="field">
+              <label>Cargo do autor</label>
+              <input type="text" id="f-autor-cargo" value="Centro de Medicina Natural">
+            </div>
+          </div>
+          <div class="field">
+            <label>Bio do autor</label>
+            <textarea id="f-autor-bio">Especialistas em medicina natural integrativa, com foco em condições crónicas, fitoterapia clínica e nutrição funcional aplicada à realidade angolana.</textarea>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label>Data de publicação</label>
+              <input type="date" id="f-data">
+            </div>
+            <div class="field">
+              <label>Imagem destacada (slug.png auto)</label>
+              <input type="text" id="f-imagem" placeholder="/image/slug.png">
+              <div class="hint">Auto-preenchida a partir do slug.</div>
+            </div>
+          </div>
+          <div class="field">
+            <label><input type="checkbox" id="f-destaque"> Marcar como destaque</label>
+          </div>
+        </div>
+      </details>
+
+      <details class="accordion" open>
+        <summary>Conteúdo do Artigo</summary>
+        <div class="accordion-body">
+          <div id="blocks-list"></div>
+          <div class="add-blocks">
+            <button class="add-btn" data-add="paragraph">T Parágrafo</button>
+            <button class="add-btn" data-add="h2">T Título H2</button>
+            <button class="add-btn" data-add="h3">T Título H3</button>
+            <button class="add-btn" data-add="quote">❝ Citação</button>
+            <button class="add-btn" data-add="list">☰ Lista</button>
+            <button class="add-btn" data-add="info">ℹ Info Box</button>
+            <button class="add-btn" data-add="image"> Imagem</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary> Tags</summary>
+        <div class="accordion-body">
+          <div class="field">
+            <label>Tags (separadas por vírgula)</label>
+            <input type="text" id="f-tags" placeholder="diabetes, fitoterapia, glicemia, medicina natural">
+          </div>
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary> SEO &amp; Open Graph</summary>
+        <div class="accordion-body">
+          <div class="field">
+            <label>Meta Title (sincronizado com título) <span class="hint">— editável</span></label>
+            <input type="text" id="f-seo-title" maxlength="70">
+            <div class="counter"><span id="c-seo-title">0</span>/70</div>
+          </div>
+          <div class="field">
+            <label>Meta Description (sincronizada com resumo)</label>
+            <textarea id="f-seo-desc" maxlength="170"></textarea>
+            <div class="counter"><span id="c-seo-desc">0</span>/170</div>
+          </div>
+          <div class="field">
+            <label>OG Image (auto = imagem destacada)</label>
+            <input type="text" id="f-og-image">
+          </div>
+        </div>
+      </details>
+
+    </div>
+
+    <!-- PREVIEW PANE -->
+    <div id="pane-preview" class="hidden">
+      <iframe id="preview-frame" class="preview-frame"></iframe>
+    </div>
+
+    <!-- CODE PANE -->
+    <div id="pane-code" class="hidden">
+      <div class="code-toolbar">
+        <div class="switch">
+          <button id="sw-html" class="active">HTML</button>
+          <button id="sw-array">Array (Repo)</button>
+        </div>
+        <button class="btn btn-success" id="btn-copy"> Copiar</button>
+      </div>
+      <pre class="code-out" id="code-out"></pre>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast">Copiado!</div>
+
+<script>
+/* =================== STATE =================== */
+const CATEGORIAS = {
+  doencas: 'Condições Tratadas',
+  prevencao: 'Prevenção Natural',
+  'bem-estar': 'Bem-estar',
+  estetica: 'Cuidados da Pele',
+  nutricao: 'Nutrição',
+};
+
+const state = {
+  blocks: [],
+  manualSeoTitle: false,
+  manualSeoDesc: false,
+  manualSlug: false,
+  manualImagem: false,
+  manualOgImage: false,
+};
+
+/* =================== UTIL =================== */
+function slugify(s) {
+  return (s || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 80);
+}
+function escapeHtml(s) {
+  return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function escapeAttr(s) { return escapeHtml(s).replace(/'/g, '&#39;'); }
+function uid() { return Math.random().toString(36).slice(2, 9); }
+function fmtDate(iso) {
+  if (!iso) return '';
+  const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const [y, m, d] = iso.split('-');
+  return `${parseInt(d,10)} de ${months[parseInt(m,10)-1]}, ${y}`;
+}
+function fmtViews(n) {
+  n = parseInt(n || 0, 10);
+  if (n >= 1000) return (n/1000).toFixed(1).replace('.0','') + 'k visualizações';
+  return n + ' visualizações';
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+/* =================== DOM REFS =================== */
+const $ = (id) => document.getElementById(id);
+const fTitulo = $('f-titulo'), fSlug = $('f-slug'), fCategoria = $('f-categoria');
+const fResumo = $('f-resumo'), fAutor = $('f-autor'), fAutorCargo = $('f-autor-cargo'), fAutorBio = $('f-autor-bio');
+const fData = $('f-data');
+const fImagem = $('f-imagem'), fDestaque = $('f-destaque'), fTags = $('f-tags');
+const fSeoTitle = $('f-seo-title'), fSeoDesc = $('f-seo-desc'), fOgImage = $('f-og-image');
+const blocksList = $('blocks-list');
+
+/* =================== SYNC LOGIC =================== */
+function syncFromTitulo() {
+  const t = fTitulo.value;
+  if (!state.manualSlug) fSlug.value = slugify(t);
+  if (!state.manualSeoTitle) fSeoTitle.value = t ? `${t} | Mubissule` : '';
+  syncFromSlug();
+  updateCounters();
+}
+function syncFromSlug() {
+  if (!state.manualImagem) fImagem.value = fSlug.value ? `/image/${fSlug.value}.webp` : '';
+  if (!state.manualOgImage) fOgImage.value = fImagem.value ? `https://mubissule.vercel.app${fImagem.value}` : '';
+}
+function syncFromResumo() {
+  if (!state.manualSeoDesc) fSeoDesc.value = fResumo.value;
+  updateCounters();
+}
+function updateCounters() {
+  $('c-titulo').textContent = fTitulo.value.length;
+  $('c-resumo').textContent = fResumo.value.length;
+  $('c-seo-title').textContent = fSeoTitle.value.length;
+  $('c-seo-desc').textContent = fSeoDesc.value.length;
+}
+
+fTitulo.addEventListener('input', syncFromTitulo);
+fSlug.addEventListener('input', () => { state.manualSlug = true; syncFromSlug(); });
+fResumo.addEventListener('input', syncFromResumo);
+fSeoTitle.addEventListener('input', () => { state.manualSeoTitle = true; updateCounters(); });
+fSeoDesc.addEventListener('input', () => { state.manualSeoDesc = true; updateCounters(); });
+fImagem.addEventListener('input', () => { state.manualImagem = true; syncFromSlug(); });
+fOgImage.addEventListener('input', () => { state.manualOgImage = true; });
+
+/* default date today */
+fData.value = new Date().toISOString().slice(0,10);
+
+/* =================== BLOCKS =================== */
+function addBlock(type, data = {}) {
+  const id = uid();
+  const block = { id, type, ...data };
+  state.blocks.push(block);
+  renderBlocks();
+}
+function moveBlock(id, dir) {
+  const i = state.blocks.findIndex(b => b.id === id);
+  const j = i + dir;
+  if (j < 0 || j >= state.blocks.length) return;
+  [state.blocks[i], state.blocks[j]] = [state.blocks[j], state.blocks[i]];
+  renderBlocks();
+}
+function removeBlock(id) {
+  state.blocks = state.blocks.filter(b => b.id !== id);
+  renderBlocks();
+}
+function updateBlock(id, key, val) {
+  const b = state.blocks.find(x => x.id === id);
+  if (b) b[key] = val;
+}
+
+const BLOCK_LABELS = {
+  paragraph: 'Parágrafo', h2: 'Título H2', h3: 'Título H3',
+  quote: 'Citação', list: 'Lista', info: 'Info Box',
+  image: 'Imagem',
+};
+
+function blockEditor(b) {
+  switch (b.type) {
+    case 'paragraph':
+      return `<textarea data-id="${b.id}" data-key="text" placeholder="Escreva o parágrafo... (use **negrito** e *itálico*)">${escapeHtml(b.text||'')}</textarea>`;
+    case 'h2':
+    case 'h3':
+      return `<input type="text" data-id="${b.id}" data-key="text" placeholder="Texto do título" value="${escapeAttr(b.text||'')}">`;
+    case 'quote':
+      return `<textarea data-id="${b.id}" data-key="text" placeholder="Frase de destaque...">${escapeHtml(b.text||'')}</textarea>`;
+    case 'list':
+      return `<textarea data-id="${b.id}" data-key="text" placeholder="Um item por linha (use **negrito**)">${escapeHtml(b.text||'')}</textarea>`;
+    case 'info':
+      return `
+        <input type="text" data-id="${b.id}" data-key="title" placeholder="Título do aviso" value="${escapeAttr(b.title||'Aviso importante')}" style="margin-bottom:.5rem">
+        <textarea data-id="${b.id}" data-key="text" placeholder="Conteúdo do aviso...">${escapeHtml(b.text||'')}</textarea>`;
+    case 'image':
+      return `
+        <input type="text" data-id="${b.id}" data-key="src" placeholder="/image/foto.webp" value="${escapeAttr(b.src||'')}" style="margin-bottom:.5rem">
+        <input type="text" data-id="${b.id}" data-key="alt" placeholder="Texto alternativo (alt)" value="${escapeAttr(b.alt||'')}">`;
+  }
+  return '';
+}
+
+function renderBlocks() {
+  blocksList.innerHTML = state.blocks.map(b => `
+    <div class="block">
+      <div class="block-head">
+        <span class="block-type">${BLOCK_LABELS[b.type] || b.type}</span>
+        <div class="block-actions">
+          <button class="icon-btn" data-mv="${b.id}" data-dir="-1" title="Subir">↑</button>
+          <button class="icon-btn" data-mv="${b.id}" data-dir="1" title="Descer">↓</button>
+          <button class="icon-btn danger" data-rm="${b.id}" title="Remover">🗑</button>
+        </div>
+      </div>
+      ${blockEditor(b)}
+    </div>
+  `).join('') || '<p style="color:#9CA3AF;text-align:center;padding:1.5rem">Nenhum bloco. Use os botões abaixo para adicionar conteúdo.</p>';
+
+  blocksList.querySelectorAll('input[data-id], textarea[data-id]').forEach(el => {
+    el.addEventListener('input', () => updateBlock(el.dataset.id, el.dataset.key, el.value));
+  });
+  blocksList.querySelectorAll('[data-mv]').forEach(el => {
+    el.addEventListener('click', () => moveBlock(el.dataset.mv, parseInt(el.dataset.dir, 10)));
+  });
+  blocksList.querySelectorAll('[data-rm]').forEach(el => {
+    el.addEventListener('click', () => { if (confirm('Remover este bloco?')) removeBlock(el.dataset.rm); });
+  });
+}
+
+document.querySelectorAll('[data-add]').forEach(btn => {
+  btn.addEventListener('click', () => addBlock(btn.dataset.add));
+});
+
+/* seed default block */
+/* =================== PERSISTÊNCIA (localStorage) =================== */
+const STORAGE_KEY = 'mubissule-editor-v1';
+const TEXT_FIELDS = ['f-titulo','f-slug','f-categoria','f-resumo','f-autor','f-autor-cargo','f-autor-bio','f-data','f-imagem','f-tags','f-seo-title','f-seo-desc','f-og-image'];
+let _saveTimer = null;
+function saveState() {
+  try {
+    const data = { fields: {}, blocks: state.blocks, flags: {
+      manualSeoTitle: state.manualSeoTitle, manualSeoDesc: state.manualSeoDesc,
+      manualSlug: state.manualSlug, manualImagem: state.manualImagem, manualOgImage: state.manualOgImage,
+    }, destaque: !!fDestaque.checked };
+    TEXT_FIELDS.forEach(id => { const el = document.getElementById(id); if (el) data.fields[id] = el.value; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) { /* quota or disabled — silent */ }
+}
+function scheduleSave() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(saveState, 250);
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (!data) return false;
+    if (data.fields) TEXT_FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && typeof data.fields[id] === 'string') el.value = data.fields[id];
+    });
+    if (data.flags) Object.assign(state, data.flags);
+    if (typeof data.destaque === 'boolean') fDestaque.checked = data.destaque;
+    if (Array.isArray(data.blocks)) state.blocks = data.blocks;
+    return true;
+  } catch (e) { return false; }
+}
+
+const _restored = loadState();
+if (_restored && state.blocks.length) {
+  renderBlocks();
+} else {
+  addBlock('paragraph', { text: '' });
+}
+
+/* auto-save on any input/change */
+document.addEventListener('input', scheduleSave, true);
+document.addEventListener('change', scheduleSave, true);
+/* patch block mutators to also persist */
+const _origAdd = addBlock, _origMove = moveBlock, _origRemove = removeBlock, _origUpdate = updateBlock;
+addBlock = function(...a){ _origAdd(...a); scheduleSave(); };
+moveBlock = function(...a){ _origMove(...a); scheduleSave(); };
+removeBlock = function(...a){ _origRemove(...a); scheduleSave(); };
+updateBlock = function(...a){ _origUpdate(...a); scheduleSave(); };
+
+/* =================== INLINE FORMATTING =================== */
+function inline(s) {
+  return escapeHtml(s)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>');
+}
+
+/* =================== HTML GENERATION =================== */
+function blocksToHtml() {
+  return state.blocks.map(b => {
+    switch (b.type) {
+      case 'paragraph':
+        return `      <p>${inline(b.text||'')}</p>`;
+      case 'h2':
+        return `      <h2>${inline(b.text||'')}</h2>`;
+      case 'h3':
+        return `      <h3>${inline(b.text||'')}</h3>`;
+      case 'quote':
+        return `      <div class="pull-quote">\n        ${inline(b.text||'')}\n      </div>`;
+      case 'list': {
+        const items = (b.text||'').split('\n').filter(Boolean)
+          .map(li => `        <li>${inline(li.trim())}</li>`).join('\n');
+        return `      <ul>\n${items}\n      </ul>`;
+      }
+      case 'info':
+        return `      <div class="info-box">\n        <h4>\n          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>\n          ${escapeHtml(b.title||'Aviso importante')}\n        </h4>\n        <p>${inline(b.text||'')}</p>\n      </div>`;
+      case 'image':
+        return `      <figure class="featured-image">\n        <img src="${escapeAttr(b.src||'')}" alt="${escapeAttr(b.alt||'')}">\n      </figure>`;
+    }
+    return '';
+  }).join('\n\n');
+}
+
+function buildHtml() {
+  const titulo = fTitulo.value || 'Sem título';
+  const slug = fSlug.value || 'sem-slug';
+  const cat = fCategoria.value;
+  const catNome = CATEGORIAS[cat];
+  const resumo = fResumo.value;
+  const autor = fAutor.value;
+  const autorCargo = fAutorCargo.value;
+  const autorBio = fAutorBio.value;
+  const data = fmtDate(fData.value);
+  const imagem = fImagem.value;
+  const seoTitle = fSeoTitle.value || `${titulo} | Mubissule`;
+  const seoDesc = fSeoDesc.value || resumo;
+  const ogImage = fOgImage.value;
+  const tags = (fTags.value || '').split(',').map(t => t.trim()).filter(Boolean);
+  const url = `https://mubissule.vercel.app/artigo/${slug}.html`;
+  const initials = (autor || 'M').split(' ').slice(0,2).map(w => w[0]||'').join('').toUpperCase();
+
+  const tagLinks = tags.map(t => `      <a href="/">#${escapeHtml(t)}</a>`).join('\n');
+
+  return `<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${escapeHtml(seoTitle)}</title>
+<meta name="description" content="${escapeAttr(seoDesc)}">
+<meta name="author" content="Mubissule — Centro de Medicina Natural">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="${url}">
+<meta property="og:type" content="article">
+<meta property="og:url" content="${url}">
+<meta property="og:title" content="${escapeAttr(seoTitle)}">
+<meta property="og:description" content="${escapeAttr(seoDesc)}">
+<meta property="og:image" content="${escapeAttr(ogImage)}">
+<meta property="og:site_name" content="Mubissule">
+<meta property="og:locale" content="pt_PT">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/mubissule-static.css">
+<link rel="icon" href="/favicon.ico">
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="container">
+    <div class="info">
+      <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#C9A24A" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span class="gold">+244 925 204 540</span></span>
+      <span style="opacity:.6">Saúde natural · Vida em equilíbrio</span>
+    </div>
+    <div class="links">
+      <a href="/sobre.html">Sobre o Centro</a>
+      <a href="/equipe.html">Nossa Equipe</a>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="container">
+    <a class="brand" href="/">
+      <img src="/mubissule-logo.png" alt="Mubissule — Centro de Medicina Natural">
+      <div class="brand-text">
+        <span class="brand-name">MUBISSULE</span>
+        <span class="brand-tagline">Medicina Natural · Angola</span>
+      </div>
+    </a>
+    <nav class="nav">
+      <a href="/">Início</a>
+      <a href="/sobre.html">Sobre</a>
+      <a href="/equipe.html">Equipa</a>
+      <a href="/#servicos">Serviços</a>
+      <a href="/#condicoes">Condições</a>
+      <a href="/#contato">Contato</a>
+    </nav>
+    <a class="cta-call" href="tel:+244925204540">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      Agendar
+    </a>
+  </div>
+</header>
+
+<main>
+
+<!-- ARTICLE HERO -->
+<section class="article-hero">
+  <div class="container">
+    <nav class="breadcrumb-nav">
+      <a href="/">Início</a><span class="sep">›</span>
+      <a href="/#condicoes">${escapeHtml(catNome)}</a><span class="sep">›</span>
+      <span>${escapeHtml(titulo)}</span>
+    </nav>
+    <span class="article-cat-badge">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
+      ${escapeHtml(catNome)}
+    </span>
+    <h1>${escapeHtml(titulo)}</h1>
+    <p class="article-lead">${escapeHtml(resumo)}</p>
+    <div class="article-meta">
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${escapeHtml(autor)}</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${escapeHtml(data)}</span>
+    </div>
+  </div>
+</section>
+
+<!-- ARTICLE BODY -->
+<section class="article-body">
+  <div class="container">
+
+    ${imagem ? `<figure class="featured-image">
+      <img src="${escapeAttr(imagem)}" alt="${escapeAttr(titulo)}">
+    </figure>` : ''}
+
+    <article class="prose">
+${blocksToHtml()}
+    </article>
+
+    <!-- TAGS -->
+    <div class="tag-list">
+${tagLinks}
+    </div>
+
+    <!-- AUTHOR -->
+    <div class="author-card">
+      <div class="avatar">${escapeHtml(initials)}</div>
+      <div class="author-info">
+        <h4>${escapeHtml(autor)}</h4>
+        <div class="role">${escapeHtml(autorCargo)}</div>
+        <p>${escapeHtml(autorBio)}</p>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-consult">
+      <h3>Pronto para cuidar da sua saúde?</h3>
+      <p>Agende a sua consulta no Mubissule e descubra um plano personalizado para o seu caso, com a tranquilidade de uma abordagem natural e clinicamente fundamentada.</p>
+      <div class="actions">
+        <a class="btn-gold" href="https://wa.me/244925204540?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20uma%20consulta%20no%20Mubissule." target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+          Agendar via WhatsApp
+        </a>
+        <a class="btn-outline" href="tel:+244925204540">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          +244 925 204 540
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="brand">
+          <img src="/mubissule-logo.png" alt="Mubissule" style="height:48px;">
+          <div class="brand-text">
+            <span class="brand-name">MUBISSULE</span>
+            <span class="brand-tagline">Medicina Natural</span>
+          </div>
+        </div>
+        <p class="desc">Centro de Medicina Natural dedicado a cuidar da sua saúde com terapias integrativas, fitoterapia e acompanhamento clínico personalizado.</p>
+      </div>
+      <div>
+        <h4>Navegação</h4>
+        <ul>
+          <li><a href="/">Início</a></li>
+          <li><a href="/sobre.html">Sobre nós</a></li>
+          <li><a href="/equipe.html">Nossa equipa</a></li>
+          <li><a href="/#servicos">Serviços</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contato</h4>
+        <ul>
+          <li><a href="tel:+244925204540">+244 925 204 540</a></li>
+          <li><a href="https://wa.me/244925204540?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20uma%20consulta%20no%20Mubissule.">WhatsApp</a></li>
+          <li><a href="mailto:mubissule@gmail.com">mubissule@gmail.com</a></li>
+          <li><a href="/privacidade.html">Privacidade</a></li>
+          <li><a href="/termos.html">Termos de uso</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © <span id="year"></span> <span class="gold">Mubissule</span> · Todos os direitos reservados.
+    </div>
+  </div>
+</footer>
+
+<a class="wa-float" href="https://wa.me/244925204540?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20uma%20consulta%20no%20Mubissule." aria-label="Falar no WhatsApp" target="_blank" rel="noopener">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z"/></svg>
+</a>
+
+<scr` + `ipt>document.getElementById("year").textContent=new Date().getFullYear();</scr` + `ipt>
+</body>
+</html>`;
+}
+
+function buildArrayEntry() {
+  const tags = (fTags.value || '').split(',').map(t => t.trim()).filter(Boolean);
+  const obj = {
+    id: Date.now() % 100000,
+    slug: fSlug.value,
+    titulo: fTitulo.value,
+    resumo: fResumo.value,
+    categoria: fCategoria.value,
+    imagem: fImagem.value,
+    autor: fAutor.value,
+    dataPublicacao: fData.value,
+    tags,
+    destaque: !!fDestaque.checked,
+  };
+  return JSON.stringify(obj, null, 2) + ',';
+}
+
+/* =================== TABS / VIEWS =================== */
+document.querySelectorAll('.subtab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.subtab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    const sub = t.dataset.sub;
+    $('pane-form').classList.toggle('hidden', sub !== 'form');
+    $('pane-preview').classList.toggle('hidden', sub !== 'preview');
+    $('pane-code').classList.toggle('hidden', sub !== 'code');
+    if (sub === 'preview') refreshPreview();
+    if (sub === 'code') refreshCode();
+  });
+});
+
+function refreshPreview() {
+  const html = buildHtml();
+  const iframe = $('preview-frame');
+  iframe.srcdoc = html;
+}
+
+let codeMode = 'html';
+$('sw-html').addEventListener('click', () => { codeMode = 'html'; $('sw-html').classList.add('active'); $('sw-array').classList.remove('active'); refreshCode(); });
+$('sw-array').addEventListener('click', () => { codeMode = 'array'; $('sw-array').classList.add('active'); $('sw-html').classList.remove('active'); refreshCode(); });
+function refreshCode() {
+  $('code-out').textContent = codeMode === 'html' ? buildHtml() : buildArrayEntry();
+}
+
+/* =================== TOOLBAR ACTIONS =================== */
+$('btn-copy').addEventListener('click', async () => {
+  await navigator.clipboard.writeText($('code-out').textContent);
+  showToast('Copiado para a área de transferência!');
+});
+
+function downloadFile(name, content, type='text/plain') {
+  const blob = new Blob([content], { type });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+$('btn-download').addEventListener('click', () => {
+  const slug = fSlug.value || 'artigo-mubissule';
+  downloadFile(`${slug}.html`, buildHtml(), 'text/html');
+  showToast('HTML descarregado!');
+});
+$('btn-show-html').addEventListener('click', () => {
+  document.querySelector('.subtab[data-sub="code"]').click();
+  if (codeMode !== 'html') $('sw-html').click();
+});
+$('btn-show-array').addEventListener('click', () => {
+  document.querySelector('.subtab[data-sub="code"]').click();
+  if (codeMode !== 'array') $('sw-array').click();
+});
+$('btn-clear').addEventListener('click', () => {
+  if (!confirm('Limpar todo o formulário?')) return;
+  document.querySelectorAll('input[type=text], input[type=number], textarea').forEach(el => {
+    if (el.id === 'f-autor' || el.id === 'f-autor-cargo' || el.id === 'f-autor-bio') return;
+    el.value = '';
+  });
+  fDestaque.checked = false;
+  fCategoria.value = 'doencas';
+  fData.value = new Date().toISOString().slice(0,10);
+  state.blocks = []; state.manualSeoTitle = state.manualSeoDesc = state.manualSlug = state.manualImagem = state.manualOgImage = false;
+  addBlock('paragraph', { text: '' });
+  updateCounters();
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  saveState();
+  showToast('Formulário limpo');
+});
+
+updateCounters();
+</script>
+<script>document.getElementById("year").textContent=new Date().getFullYear();</script>
+</body>
+</html>
