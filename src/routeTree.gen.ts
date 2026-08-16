@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EquipeRouteImport } from './routes/equipe'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as SobreRouteImport } from './routes/sobre'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +24,11 @@ const EquipeRoute = EquipeRouteImport.update({
   path: '/equipe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
@@ -32,30 +38,34 @@ const SobreRoute = SobreRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/equipe': typeof EquipeRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/equipe': typeof EquipeRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/equipe': typeof EquipeRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/equipe' | '/sobre'
+  fullPaths: '/' | '/equipe' | '/privacidade' | '/sobre'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/equipe' | '/sobre'
-  id: '__root__' | '/' | '/equipe' | '/sobre'
+  to: '/' | '/equipe' | '/privacidade' | '/sobre'
+  id: '__root__' | '/' | '/equipe' | '/privacidade' | '/sobre'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   EquipeRoute: typeof EquipeRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
   SobreRoute: typeof SobreRoute
 }
 
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EquipeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sobre': {
       id: '/sobre'
       path: '/sobre'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   EquipeRoute: EquipeRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
   SobreRoute: SobreRoute,
 }
 export const routeTree = rootRouteImport
