@@ -1,22 +1,23 @@
-import { NavLink as RouterNavLink, NavLinkProps } from "react-router-dom";
+import { Link, useRouterState, type LinkProps } from "@tanstack/react-router";
 import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
-interface NavLinkCompatProps extends Omit<NavLinkProps, "className"> {
+interface NavLinkCompatProps extends Omit<LinkProps, "className"> {
   className?: string;
   activeClassName?: string;
   pendingClassName?: string;
 }
 
 const NavLink = forwardRef<HTMLAnchorElement, NavLinkCompatProps>(
-  ({ className, activeClassName, pendingClassName, to, ...props }, ref) => {
+  ({ className, activeClassName, to, ...props }, ref) => {
+    const pathname = useRouterState({ select: (s) => s.location.pathname });
+    const isActive = pathname === to;
+
     return (
-      <RouterNavLink
+      <Link
         ref={ref}
-        to={to}
-        className={({ isActive, isPending }) =>
-          cn(className, isActive && activeClassName, isPending && pendingClassName)
-        }
+        to={to as LinkProps["to"]}
+        className={cn(className, isActive && activeClassName)}
         {...props}
       />
     );
