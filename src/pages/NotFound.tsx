@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { useRouterState } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { Home, ArrowLeft, Leaf, MessageCircle } from 'lucide-react';
 import Header from '@/components/Header';
@@ -7,7 +7,7 @@ import Footer from '@/components/Footer';
 const WHATSAPP = 'https://wa.me/244925204540?text=Ol%C3%A1%2C%20cheguei%20a%20uma%20p%C3%A1gina%20que%20n%C3%A3o%20existe%20no%20site%20Mubissule';
 
 const NotFound = () => {
-  const location = useLocation();
+  const location = useRouterState({ select: (s) => s.location });
 
   useEffect(() => {
     console.error('404 Error: User attempted to access non-existent route:', location.pathname);

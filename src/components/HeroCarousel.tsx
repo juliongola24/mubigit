@@ -22,7 +22,7 @@ const HeroCarousel = ({ artigos }: HeroCarouselProps) => {
 
   if (artigos.length === 0) return null;
 
-  const artigo = artigos[current];
+  const artigo = artigos[current]!;
   const categoria = categorias[artigo.categoria];
 
   return (

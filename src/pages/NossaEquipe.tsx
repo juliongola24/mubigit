@@ -1,4 +1,4 @@
-import { Linkedin, Mail, Users, Phone, MessageCircle, Award } from 'lucide-react';
+import { Link2 as Linkedin, Mail, Users, Phone, MessageCircle, Award } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
