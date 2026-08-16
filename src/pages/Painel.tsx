@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { ghAction, type RepoCommit, type RepoItem } from "@/lib/github";
 import { Button } from "@/components/ui/button";
@@ -22,17 +21,15 @@ import {
 
 const parentOf = (path: string) => path.split("/").slice(0, -1).join("/");
 
+const SESSION_KEY = "mubissule_debug_user";
+
 export default function Painel() {
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<string | null>(null);
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setChecking(false);
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
-    return () => sub.subscription.unsubscribe();
+    setUser(localStorage.getItem(SESSION_KEY));
+    setChecking(false);
   }, []);
 
   useEffect(() => {
@@ -44,6 +41,11 @@ export default function Painel() {
     return () => robots.remove();
   }, []);
 
+  const signOut = () => {
+    localStorage.removeItem(SESSION_KEY);
+    setUser(null);
+  };
+
   if (checking) {
     return (
       <main className="flex min-h-screen items-center justify-center text-muted-foreground">
@@ -52,24 +54,35 @@ export default function Painel() {
     );
   }
 
-  return (
-    <>
-      {session ? <Editor onSignOut={() => supabase.auth.signOut()} /> : <Login />}
-    </>
-  );
+  return <>{user ? <Editor onSignOut={signOut} /> : <Login onLogin={setUser} />}</>;
 }
 
-function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+function Login({ onLogin }: { onLogin: (u: string) => void }) {
+  const [usuario, setUsuario] = useState("");
+  const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await (supabase as any)
+      .from("debug")
+      .select("usuario")
+      .eq("usuario", usuario.trim())
+      .eq("senha", senha)
+      .maybeSingle();
     setLoading(false);
-    if (error) toast.error(error.message);
+
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    if (!data) {
+      toast.error("Utilizador ou palavra-passe incorrectos.");
+      return;
+    }
+    localStorage.setItem(SESSION_KEY, data.usuario);
+    onLogin(data.usuario);
   };
 
   return (
@@ -81,22 +94,24 @@ function Login() {
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">E-mail</Label>
+              <Label htmlFor="usuario">Utilizador</Label>
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="usuario"
+                type="text"
+                autoComplete="username"
+                value={usuario}
+                onChange={(e) => setUsuario(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Palavra-passe</Label>
+              <Label htmlFor="senha">Palavra-passe</Label>
               <Input
-                id="password"
+                id="senha"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
                 required
               />
             </div>
@@ -109,6 +124,7 @@ function Login() {
     </main>
   );
 }
+
 
 function Editor({ onSignOut }: { onSignOut: () => void }) {
   const [repo, setRepo] = useState<{ owner: string; repo: string; branch: string } | null>(null);
